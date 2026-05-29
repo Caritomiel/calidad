@@ -1,17 +1,24 @@
+import os
+import json
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
-import ipaddress
-import json
-import socket
-import sys
-import threading
+from supabase import create_client, Client
 
+# --- 1. CONFIGURACIÓN PARA LA NUBE ---
+# El hosting asignará un puerto dinámico, si no, usa el 8766
+PORT = int(os.environ.get("PORT", 8766))
 
-PORT = int(sys.argv[1]) if len(sys.argv) > 1 else 8766
-BASE_DIR = Path(__file__).resolve().parent
-DB_PATH = BASE_DIR / "database.json"
-LOCK = threading.Lock()
+# Se leen las credenciales desde las variables de entorno de Render/Railway
+SUPABASE_URL = os.environ.get("SUPABASE_URL")
+SUPABASE_KEY = os.environ.get("SUPABASE_KEY")
 
+if SUPABASE_URL and SUPABASE_KEY:
+    supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
+else:
+    supabase = None
+    print("ADVERTENCIA: Iniciando sin base de datos remota conectada.")
+
+# --- 2. DATOS POR DEFECTO ---
 DEFAULT_PROJECTS = [
     {"key": "EZ", "name": "Estacionamiento Zumaya"},
     {"key": "AN", "name": "Ampliacion Nave"},
@@ -21,42 +28,31 @@ DEFAULT_PROJECTS = [
     {"key": "50D", "name": "50 Doctors"},
 ]
 
-
 def default_state():
     return {"records": [], "projects": DEFAULT_PROJECTS}
 
-
+# --- 3. FUNCIONES DE LECTURA Y ESCRITURA EN SUPABASE ---
 def read_state():
-    with LOCK:
-        if not DB_PATH.exists():
-            write_state(default_state())
-
-        try:
-            with DB_PATH.open("r", encoding="utf-8") as file:
-                data = json.load(file)
-        except (json.JSONDecodeError, OSError):
-            data = default_state()
-
-        if not isinstance(data, dict):
-            data = default_state()
-
-        records = data.get("records")
-        projects = data.get("projects")
-        if not isinstance(records, list):
-            records = []
-        if not isinstance(projects, list) or not projects:
-            projects = DEFAULT_PROJECTS
-
-        return {"records": records, "projects": projects}
-
+    if not supabase: return default_state()
+    try:
+        response = supabase.table("app_data").select("data").eq("id", 1).execute()
+        if response.data:
+            data = response.data[0].get("data", {})
+            records = data.get("records", [])
+            projects = data.get("projects", DEFAULT_PROJECTS)
+            return {"records": records, "projects": projects or DEFAULT_PROJECTS}
+    except Exception as e:
+        print(f"Error leyendo de Supabase: {e}")
+    return default_state()
 
 def write_state(data):
-    DB_PATH.write_text(
-        json.dumps(data, ensure_ascii=False, indent=2),
-        encoding="utf-8",
-    )
+    if not supabase: return
+    try:
+        supabase.table("app_data").upsert({"id": 1, "data": data}).execute()
+    except Exception as e:
+        print(f"Error escribiendo en Supabase: {e}")
 
-
+# --- 4. MANEJADOR HTTP ORIGINAL ---
 class AppHandler(SimpleHTTPRequestHandler):
     def end_headers(self):
         if self.path.endswith((".html", ".js", ".css", ".webmanifest")) or self.path.startswith("/api/"):
@@ -89,8 +85,7 @@ class AppHandler(SimpleHTTPRequestHandler):
             return
 
         clean_state = {"records": records, "projects": projects or DEFAULT_PROJECTS}
-        with LOCK:
-            write_state(clean_state)
+        write_state(clean_state)
         self.send_json(200, {"ok": True})
 
     def send_json(self, status, data):
@@ -101,35 +96,7 @@ class AppHandler(SimpleHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(body)
 
-
-def local_ips():
-    private_ips = []
-    other_ips = []
-    hostname = socket.gethostname()
-    for item in socket.getaddrinfo(hostname, None, socket.AF_INET):
-        ip = item[4][0]
-        if ip.startswith("127."):
-            continue
-
-        try:
-            is_private = ipaddress.ip_address(ip).is_private
-        except ValueError:
-            is_private = False
-
-        if is_private and ip not in private_ips:
-            private_ips.append(ip)
-        elif ip not in other_ips:
-            other_ips.append(ip)
-
-    return private_ips or other_ips
-
-
 if __name__ == "__main__":
     server = ThreadingHTTPServer(("0.0.0.0", PORT), AppHandler)
-    print("\nCONTROL DE INSPECCIONES Y REPARACIONES")
-    print("Base compartida activa en database.json\n")
-    print("Abra este link en los celulares conectados al mismo Wi-Fi:")
-    for ip in local_ips():
-        print(f"  http://{ip}:{PORT}/index.html")
-    print("\nDeje esta ventana abierta mientras usen la app.\n")
+    print(f"\nServidor en la nube iniciado en el puerto {PORT}")
     server.serve_forever()
