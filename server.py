@@ -9,8 +9,8 @@ from supabase import create_client, Client
 PORT = int(os.environ.get("PORT", 8766))
 
 # Se leen las credenciales desde las variables de entorno de Render/Railway
-SUPABASE_URL = os.environ.get("SUPABASE_URL")
-SUPABASE_KEY = os.environ.get("SUPABASE_KEY")
+SUPABASE_URL = os.environ.get(https://bjfezwyciknhpihiwoxu.supabase.co)
+SUPABASE_KEY = os.environ.get(eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJqZmV6d3ljaWtuaHBpaGl3b3h1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAwNzIyMDUsImV4cCI6MjA5NTY0ODIwNX0.q2jKJaGuR-zpG_sbw7mA02bN7LocCtbac0ACNnuDsBE)
 
 if SUPABASE_URL and SUPABASE_KEY:
     supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
