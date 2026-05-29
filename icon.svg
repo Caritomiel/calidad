@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="96" fill="#0f172a"/>
+  <path d="M80 226 256 112l176 114-176 38Z" fill="#38bdf8"/>
+  <path d="M128 286h256v54H128z" fill="#22c55e"/>
+  <path d="M146 328h220v42H146z" fill="#f59e0b"/>
+  <path d="M154 226 256 160l102 66-102 22Z" fill="#1d4ed8"/>
+  <text x="256" y="424" text-anchor="middle" font-family="Arial, sans-serif" font-size="56" font-weight="800" fill="#ffffff">ES</text>
+</svg>

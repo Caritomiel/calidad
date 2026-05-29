@@ -1,0 +1,17 @@
+{
+  "name": "Control de Inspecciones y Reparaciones",
+  "short_name": "Control Calidad",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#0b1117",
+  "theme_color": "#0f172a",
+  "description": "Registro rapido de inspecciones, reinspecciones y reparaciones de produccion.",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

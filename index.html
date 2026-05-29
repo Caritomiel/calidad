@@ -1,0 +1,244 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="theme-color" content="#0f172a">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="Control Calidad">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Control de Retrabajos | Estroktor Calidad</title>
+    <link rel="manifest" href="manifest.webmanifest?v=8">
+    <link rel="stylesheet" href="styles.css?v=8">
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <div class="brand-mark" aria-hidden="true">
+          <span>ES</span>
+        </div>
+        <div>
+          <p class="eyebrow">Estroktor Calidad</p>
+          <h1>Control de inspecciones y reparaciones</h1>
+        </div>
+      </header>
+
+      <main>
+        <section class="toolbar" aria-label="Acciones principales">
+          <button class="action-btn action-blue" data-start-type="inspeccion">
+            <span class="btn-icon" aria-hidden="true">+</span>
+            <span>Inspección</span>
+          </button>
+          <button class="action-btn action-cyan" data-start-type="reinspeccion">
+            <span class="btn-icon" aria-hidden="true">+</span>
+            <span>Reinspección</span>
+          </button>
+          <button class="action-btn action-green" data-start-type="reparacion">
+            <span class="btn-icon" aria-hidden="true">+</span>
+            <span>Reparación</span>
+          </button>
+        </section>
+
+        <section class="status-grid" aria-label="Resumen">
+          <article>
+            <span class="metric" id="metric-total">0</span>
+            <span class="metric-label">Total</span>
+          </article>
+          <article>
+            <span class="metric" id="metric-inspection">0</span>
+            <span class="metric-label">Inspecciones</span>
+          </article>
+          <article>
+            <span class="metric" id="metric-reinspection">0</span>
+            <span class="metric-label">Reinspecciones</span>
+          </article>
+          <article>
+            <span class="metric" id="metric-repair">0</span>
+            <span class="metric-label">Reparaciones</span>
+          </article>
+          <article>
+            <span class="metric" id="metric-open">0</span>
+            <span class="metric-label">Abiertos</span>
+          </article>
+          <article>
+            <span class="metric" id="metric-today">0</span>
+            <span class="metric-label">Hoy</span>
+          </article>
+        </section>
+
+        <section class="panel panel-form" aria-labelledby="form-title">
+          <div class="panel-heading">
+            <div>
+              <p class="eyebrow">Registro rápido</p>
+              <h2 id="form-title">Nuevo movimiento</h2>
+            </div>
+            <button class="ghost-btn" id="reset-form" type="button">Limpiar</button>
+          </div>
+
+          <form id="record-form" autocomplete="off">
+            <input type="hidden" id="record-id">
+            <div class="type-tabs" role="tablist" aria-label="Tipo de registro">
+              <button type="button" class="type-tab active" data-type="inspeccion">Inspección</button>
+              <button type="button" class="type-tab" data-type="reinspeccion">Reinspección</button>
+              <button type="button" class="type-tab" data-type="reparacion">Reparación</button>
+            </div>
+
+            <div class="form-grid">
+              <label>
+                Proyecto
+                <select id="project" required></select>
+              </label>
+              <label>
+                Pieza / A.N. / Junta
+                <input id="piece" required placeholder="Ej. A.N: COL-5">
+              </label>
+              <label>
+                Inicio
+                <input id="start-at" type="datetime-local" required>
+              </label>
+              <label>
+                Fin
+                <input id="end-at" type="datetime-local">
+              </label>
+              <label class="field-inspection">
+                Proceso
+                <select id="process">
+                  <option value="Visual">Visual</option>
+                  <option value="Prueba de líquidos penetrantes">Prueba de líquidos penetrantes</option>
+                  <option value="Dimensional">Dimensional</option>
+                  <option value="Liberación">Liberación</option>
+                </select>
+              </label>
+              <label class="field-repair hidden">
+                Motivo de reparación
+                <input id="repair-reason" placeholder="Ej. descuadre mayor a 1 cm">
+              </label>
+              <label class="field-inspection">
+                Nombre de colaborador
+                <input id="welder" placeholder="Nombre(s)">
+              </label>
+              <label class="field-repair hidden">
+                Nombre de colaborador
+                <input id="assembler" placeholder="Nombre(s)">
+              </label>
+              <label>
+                Inspector
+                <input id="inspector" placeholder="Nombre del inspector">
+              </label>
+              <label class="field-inspection">
+                Juntas realizadas
+                <input id="joints" inputmode="numeric" type="number" min="0" placeholder="0">
+              </label>
+              <label class="field-inspection">
+                Marca / consumible
+                <input id="brand" placeholder="Marca de líquidos o consumible">
+              </label>
+              <label>
+                Estado
+                <select id="status">
+                  <option value="abierto">Abierto</option>
+                  <option value="cerrado">Cerrado</option>
+                </select>
+              </label>
+              <label class="notes-field">
+                Observaciones
+                <textarea id="notes" rows="3" placeholder="Detalle corto para encontrarlo rápido después"></textarea>
+              </label>
+            </div>
+
+            <div class="form-actions">
+              <button class="primary-btn" type="submit" id="save-record">Guardar registro</button>
+              <button class="secondary-btn" type="button" id="save-and-close">Guardar y cerrar ahora</button>
+            </div>
+          </form>
+        </section>
+
+        <section class="panel" aria-labelledby="open-title">
+          <div class="panel-heading">
+            <div>
+              <p class="eyebrow">Pendientes</p>
+              <h2 id="open-title">Trabajos abiertos</h2>
+            </div>
+          </div>
+          <div id="open-list" class="record-list empty-state"></div>
+        </section>
+
+        <section class="panel" aria-labelledby="search-title">
+          <div class="panel-heading">
+            <div>
+              <p class="eyebrow">Consulta</p>
+              <h2 id="search-title">Historial y búsqueda</h2>
+            </div>
+            <div class="export-actions">
+              <button class="ghost-btn" id="export-csv" type="button">CSV</button>
+              <button class="ghost-btn" id="export-json" type="button">Respaldo</button>
+            </div>
+          </div>
+
+          <div class="filters">
+            <label>
+              Buscar
+              <input id="search" placeholder="Proyecto, pieza, persona o texto">
+            </label>
+            <label>
+              Tipo
+              <select id="filter-type">
+                <option value="">Todos</option>
+                <option value="inspeccion">Inspección</option>
+                <option value="reinspeccion">Reinspección</option>
+                <option value="reparacion">Reparación</option>
+              </select>
+            </label>
+            <label>
+              Estado
+              <select id="filter-status">
+                <option value="">Todos</option>
+                <option value="abierto">Abiertos</option>
+                <option value="cerrado">Cerrados</option>
+              </select>
+            </label>
+            <label>
+              Desde
+              <input id="filter-from" type="date">
+            </label>
+            <label>
+              Hasta
+              <input id="filter-to" type="date">
+            </label>
+          </div>
+
+          <div id="record-list" class="record-list"></div>
+        </section>
+
+        <section class="panel" aria-labelledby="projects-title">
+          <div class="panel-heading">
+            <div>
+              <p class="eyebrow">Claves</p>
+              <h2 id="projects-title">Proyectos activos</h2>
+            </div>
+          </div>
+          <form id="project-form" class="project-form" autocomplete="off">
+            <input id="project-key" maxlength="12" placeholder="Clave" required>
+            <input id="project-name" placeholder="Nombre del proyecto" required>
+            <button class="secondary-btn" type="submit">Agregar</button>
+          </form>
+          <div id="project-list" class="project-list"></div>
+        </section>
+      </main>
+    </div>
+
+    <dialog id="confirm-dialog">
+      <form method="dialog" class="dialog-card">
+        <h2 id="dialog-title">Confirmar</h2>
+        <p id="dialog-message"></p>
+        <div class="dialog-actions">
+          <button value="cancel" class="ghost-btn">Cancelar</button>
+          <button value="confirm" class="danger-btn">Eliminar</button>
+        </div>
+      </form>
+    </dialog>
+
+    <script src="app.js?v=8" defer></script>
+  </body>
+</html>
