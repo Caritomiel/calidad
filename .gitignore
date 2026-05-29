@@ -1,1 +1,5 @@
-
+database.json
+database.*.json
+INICIAR_APP_CELULAR.bat
+__pycache__/
+.env
